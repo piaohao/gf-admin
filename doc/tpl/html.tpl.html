@@ -1,0 +1,153 @@
+<div id="content-wrapper">
+
+    <div class="container-fluid">
+
+        <!-- Breadcrumbs-->
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="/admin/main">首页</a>
+            </li>
+            <li class="breadcrumb-item active">{{.TableComment}}</li>
+        </ol>
+
+        <!-- Icon Cards-->
+        <div class="card mb-3">
+            <div class="card-header">{{.TableComment}}</div>
+            <div class="card-body">
+                <div class="form-inline">
+                    {{range .Fields}}
+                        <div class="input-group mb-2 mr-sm-2">
+                            <div class="input-group-prepend">
+                                <div class="input-group-text">{{.Comment}}</div>
+                            </div>
+                            <input type="text" class="form-control" id="search-{{.OriginalName}}">
+                        </div>
+                    {{end}}
+                    <button class="btn btn-primary mb-2 mr-sm-2" id="searchBtn">搜索</button>
+                    {{`{{`}}if hasPermission "/admin/{{.TableName}}/add" .Session.permissions{{`}}`}}
+                    <button class="btn btn-primary mb-2" id="addBtn">添加</button>
+                    {{`{{`}}end{{`}}`}}
+                </div>
+                <table id="table" class="table table-bordered"></table>
+            </div>
+        </div>
+
+
+    </div>
+    <!-- /.container-fluid -->
+
+    <!-- Sticky Footer -->
+    <footer class="sticky-footer">
+        <div class="container my-auto">
+            <div class="copyright text-center my-auto">
+                <span>Copyright © GF-ADMIN 2019</span>
+            </div>
+        </div>
+    </footer>
+
+</div>
+<!-- 表单弹窗 -->
+<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">信息</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="form" class="form-horizontal">
+                    {{range .Fields}}
+                        <div class="form-group row">
+                            <label for="{{.OriginalName}}" class="col-sm-3 col-form-label">{{.Comment}}</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="{{.OriginalName}}" name="{{.OriginalName}}"
+                                       placeholder="{{.Comment}}" {{if eq .OriginalName "id"}}readonly{{end}}/>
+                            </div>
+                        </div>
+                    {{end}}
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">取消</button>
+                <a class="btn btn-primary" href="#" id="saveBtn">保存</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script id="tpl-opDiv" type="text/html">
+    {{`{{`}}if hasPermission "/admin/{{.TableName}}/edit" .Session.permissions{{`}}`}}
+    <button class="btn btn-primary btn-sm" onclick="edit(<%= row.id%>);">编辑</button>
+    {{`{{`}}end{{`}}`}}
+    {{`{{`}}if hasPermission "/admin/{{.TableName}}/remove" .Session.permissions{{`}}`}}
+    <button class="btn btn-primary btn-sm ml-1" onclick="remove(<%= row.id%>);">删除</button>
+    {{`{{`}}end{{`}}`}}
+</script>
+<script>
+    function edit(id) {
+        $('#form')[0].reset();
+        PH.api2('/admin/{{.TableName}}/get',
+            {
+                "id": id,
+            }, function (ret) {
+                    {{range .Fields}} $('#{{.OriginalName}}').val(ret.data.{{.OriginalName}});
+                    {{end}}
+                $('#modal').modal();
+            });
+    }
+
+    function remove(id) {
+        layer.confirm('是否确定删除?', {icon: 3, title: '提示'}, function (index) {
+            PH.api2('/admin/{{.TableName}}/remove',
+                {
+                    "id": id,
+                }, function (ret) {
+                    let index=layer.alert("删除成功", function () {
+                        layer.close(index);
+                        table.ajax.reload(null, false);
+                    });
+                });
+        });
+    }
+
+    $(function () {
+        let table = PH.table("#table", "/admin/{{.TableName}}/list", function () {
+                return {
+                    {{range .Fields}} "{{.OriginalName}}": $('#search-{{.OriginalName}}').val(),
+                    {{end}}
+                };
+            },
+            [
+                {{range .Fields}} {"data": "{{.OriginalName}}", "title": "{{.Comment}}"},
+                {{end}}
+                {
+                    "title": "操作",
+                    "render": function (data, type, row, meta) {
+                        return template.render($('#tpl-opDiv').text(), {row: row});
+                    }
+                }
+            ]);
+        $('#addBtn').click(function () {
+            $('#form')[0].reset();
+            $('#modal').modal();
+        });
+        $('#saveBtn').click(function () {
+            PH.api2('/admin/{{.TableName}}/save',
+                {
+                    {{range .Fields}} "{{.OriginalName}}": $('#{{.OriginalName}}').val(),
+                    {{end}}
+                },
+                function (ret) {
+                    $('#modal').modal('hide');
+                    let index = layer.alert("保存成功", function () {
+                        layer.close(index);
+                        table.ajax.reload(null, false);
+                    });
+                });
+        });
+        $('#searchBtn').click(function () {
+            table.ajax.reload();
+        });
+    });
+</script>

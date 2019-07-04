@@ -1,0 +1,38 @@
+<div id="content-wrapper">
+
+    <div class="container-fluid">
+
+        <!-- Breadcrumbs-->
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="/admin/main">首页</a>
+            </li>
+            <li class="breadcrumb-item active">预览</li>
+        </ol>
+
+        <!-- Icon Cards-->
+        <div class="card mb-3">
+            <div class="card-header">首页</div>
+            <div class="card-body">
+                {{if hasPermission "/admin/code/index1" .Session.permissions}}
+                    有代码生成的权限
+                {{else}}
+                    欢迎使用GF-ADMIN
+                {{end}}
+            </div>
+        </div>
+
+
+    </div>
+    <!-- /.container-fluid -->
+
+    <!-- Sticky Footer -->
+    <footer class="sticky-footer">
+        <div class="container my-auto">
+            <div class="copyright text-center my-auto">
+                <span>Copyright © GF-ADMIN 2019</span>
+            </div>
+        </div>
+    </footer>
+
+</div>

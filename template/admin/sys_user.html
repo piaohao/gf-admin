@@ -1,0 +1,225 @@
+<div id="content-wrapper">
+
+    <div class="container-fluid">
+
+        <!-- Breadcrumbs-->
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="/admin/main">首页</a>
+            </li>
+            <li class="breadcrumb-item active">预览</li>
+        </ol>
+
+        <!-- Icon Cards-->
+        <div class="card mb-3">
+            <div class="card-header">用户管理</div>
+            <div class="card-body">
+                <div class="form-inline">
+                    <div class="input-group mb-2 mr-sm-2">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">用户名</div>
+                        </div>
+                        <input type="text" class="form-control" id="searchUsername">
+                    </div>
+                    <div class="input-group mb-2 mr-sm-2">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">昵称</div>
+                        </div>
+                        <input type="text" class="form-control" id="searchNickname">
+                    </div>
+                    <button class="btn btn-primary mb-2 mr-sm-2" id="searchBtn">搜索</button>
+                    <button class="btn btn-primary mb-2" id="addBtn">添加</button>
+                </div>
+                <table id="table" class="table table-bordered"></table>
+            </div>
+        </div>
+
+
+    </div>
+    <!-- /.container-fluid -->
+
+    <!-- Sticky Footer -->
+    <footer class="sticky-footer">
+        <div class="container my-auto">
+            <div class="copyright text-center my-auto">
+                <span>Copyright © GF-ADMIN 2019</span>
+            </div>
+        </div>
+    </footer>
+
+</div>
+<!-- Logout Modal-->
+<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">信息</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="form" class="form-horizontal">
+                    <input type="hidden" class="form-control" id="id" name="id">
+                    <div class="form-group row">
+                        <label for="username" class="col-sm-3 col-form-label">用户名</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="username" name="username" placeholder="用户名">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="password" class="col-sm-3  col-form-label">密码</label>
+                        <div class="col-sm-9">
+                            <input type="password" class="form-control" id="password" name="password"
+                                   placeholder="密码">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="nickname" class="col-sm-3  col-form-label">昵称</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="nickname" name="nickname"
+                                   placeholder="昵称">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="mobile" class="col-sm-3  col-form-label">电话</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="mobile" name="mobile"
+                                   placeholder="电话">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-3  col-form-label">角色</label>
+                        <div class="col-sm-9" id="roleDiv">
+
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">取消</button>
+                <a class="btn btn-primary" href="#" id="saveBtn">保存</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script id="tpl-roleDiv" type="text/html">
+    <% for(var i = 0; i < allRoles.length; i++){ %>
+    <div class="form-check form-check-inline">
+        <input class="form-check-input" type="checkbox" id="roleId<%= i%>" name="roleId" value="<%= allRoles[i].id%>"
+        <%if(allRoles[i].checked){%> checked <%}%> >
+        <label class="form-check-label" for="roleId<%= i%>">
+            <%= allRoles[i].name%>(<%= allRoles[i].description%>)</label>
+    </div>
+    <% } %>
+</script>
+<script>
+    function edit(userId) {
+        $('#form')[0].reset();
+        PH.api2('/admin/sys_user/get',
+            {
+                "id": userId,
+            }, function (ret) {
+                $('#id').val(userId);
+                $('#username').val(ret.data.username);
+                $('#password').val(ret.data.password);
+                $('#nickname').val(ret.data.nickname);
+                $('#mobile').val(ret.data.mobile);
+                PH.api2('/admin/sys_user/getRoleIds',
+                    {
+                        "id": userId,
+                    }, function (ret) {
+                        ret.data.allRoles.forEach(function (item, index) {
+                            let exist = false;
+                            ret.data.userRoles.forEach(function (r) {
+                                if (r.role_id == item.id) {
+                                    exist = true;
+                                }
+                            });
+                            item.checked = exist;
+                        });
+                        let html = template.render($('#tpl-roleDiv').text(), {allRoles: ret.data.allRoles});
+                        $('#roleDiv').html(html);
+                        $('#modal').modal();
+                    });
+            });
+    }
+
+    function remove(userId) {
+        layer.confirm('是否确定删除?', {icon: 3, title: '提示'}, function (index) {
+            PH.api2('/admin/sys_user/remove',
+                {
+                    "id": userId,
+                }, function (ret) {
+                    let index=layer.alert("删除成功", function () {
+                        layer.close(index);
+                        table.ajax.reload(null, false);
+                    });
+                });
+        });
+    }
+
+    $(function () {
+        let table = PH.table("#table", "/admin/sys_user/list", function () {
+                return {"username": $('#searchUsername').val(), "nickname": $('#searchNickname').val(),};
+            },
+            [
+                {"data": "id", "title": "ID"},
+                {"data": "username", "title": "用户名"},
+                {
+                    "data": "password", "title": "密码",
+                    "render": function (data, type, row, meta) {
+                        return '******';
+                    }
+                },
+                {"data": "nickname", "title": "昵称"},
+                {"data": "mobile", "title": "电话"},
+                {"data": "role_name", "title": "角色"},
+                // {"data": "create_time", "title": "创建日期"},
+                // {"data": "update_time", "title": "更新日期"},
+                {
+                    "title": "操作",
+                    "render": function (data, type, row, meta) {
+                        return '<button class="btn btn-primary btn-sm" onclick="edit(' + row.id + ');">编辑</button>' +
+                            '<button class="btn btn-primary btn-sm ml-1" onclick="remove(' + row.id + ');">删除</button>';
+                    }
+                }
+            ]);
+        $('#addBtn').click(function () {
+            $('#form')[0].reset();
+            PH.api2('/admin/sys_user/getRoleIds',
+                {
+                    "id": {{.Session.user.id}},
+                }, function (ret) {
+                    let html = template.render($('#tpl-roleDiv').text(), {allRoles: ret.data.allRoles});
+                    $('#roleDiv').html(html);
+                    $('#modal').modal();
+                });
+        });
+        $('#saveBtn').click(function () {
+            let roleIds = [];
+            $('input[name="roleId"]:checked').each(function (index, item) {
+                roleIds.push($(this).val());
+            });
+            PH.api2('/admin/sys_user/save',
+                {
+                    "roleIds": roleIds.join(","),
+                    "id": $('#id').val(),
+                    "username": $('#username').val(),
+                    "password": $('#password').val(),
+                    "nickname": $('#nickname').val(),
+                    "mobile": $('#mobile').val(),
+                },
+                function (data) {
+                    $('#modal').modal('hide');
+                    let index = layer.alert("保存成功", function () {
+                        layer.close(index);
+                        table.ajax.reload(null, false);
+                    });
+                });
+        });
+        $('#searchBtn').click(function () {
+            table.ajax.reload();
+        });
+    });
+</script>

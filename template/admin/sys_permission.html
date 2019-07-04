@@ -1,0 +1,271 @@
+<link rel="stylesheet" href="/static/zTree/css/metroStyle/metroStyle.css" type="text/css">
+<script type="text/javascript" src="/static/zTree/js/jquery.ztree.core.js"></script>
+<style>
+    #rMenu ul {
+        padding: 0;
+        margin: 0;
+    }
+
+    div#rMenu {
+        position: absolute;
+        visibility: hidden;
+        top: 0;
+        background-color: #555;
+        text-align: left;
+        padding: 2px;
+    }
+
+    div#rMenu ul li {
+        margin: 1px 0;
+        padding: 0 5px;
+        cursor: pointer;
+        list-style: none outside none;
+        background-color: #DFDFDF;
+    }
+</style>
+<div id="content-wrapper">
+
+    <div class="container-fluid">
+
+
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="/admin/main">首页</a>
+            </li>
+            <li class="breadcrumb-item active">权限表</li>
+        </ol>
+
+
+        <div class="card mb-3">
+            <div class="card-header">权限表(请邮件点击权限数节点，进行添加、编辑、删除、查看操作)</div>
+            <div class="card-body">
+                <ul id="tree" class="ztree"></ul>
+            </div>
+        </div>
+
+
+    </div>
+
+
+    <footer class="sticky-footer">
+        <div class="container my-auto">
+            <div class="copyright text-center my-auto">
+                <span>Copyright © GF-ADMIN 2019</span>
+            </div>
+        </div>
+    </footer>
+
+</div>
+<div id="rMenu">
+    <ul>
+        <li id="m_add" onclick="add();">添加权限</li>
+        <li id="m_update" onclick="update();">编辑权限</li>
+        <li id="m_del" onclick="remove();">删除权限</li>
+        {{/*<li id="m_view" onclick="view();">查看详情</li>*/}}
+    </ul>
+</div>
+<!-- Logout Modal-->
+<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">信息</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="form" class="form-horizontal">
+                    <input type="hidden" class="form-control" id="id" name="id">
+                    <div class="form-group row">
+                        <label for="code" class="col-sm-3 col-form-label">编码</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="code" name="code" placeholder="编码">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="parent_code" class="col-sm-3  col-form-label">父编码</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="parent_code" name="parent_code"
+                                   placeholder="父编码" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="priority" class="col-sm-3  col-form-label">排序</label>
+                        <div class="col-sm-9">
+                            <input type="number" class="form-control" id="priority" name="priority" placeholder="排序">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="name" class="col-sm-3  col-form-label">名称</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="name" name="name" placeholder="名称">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="icon" class="col-sm-3  col-form-label">图标</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="icon" name="icon" placeholder="图标">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="url" class="col-sm-3  col-form-label">链接</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="url" name="url" placeholder="链接">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="is_menu" class="col-sm-3  col-form-label">是否是菜单</label>
+                        <div class="col-sm-9">
+                            {{/*<input type="text" class="form-control" id="is_menu" placeholder="是否是菜单">*/}}
+                            <select class="form-control" id="is_menu" name="is_menu">
+                                <option value="1">是</option>
+                                <option value="0">否</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">取消</button>
+                <a class="btn btn-primary" href="#" id="saveBtn">保存</a>
+            </div>
+        </div>
+    </div>
+</div>
+<SCRIPT type="text/javascript">
+    <!--
+    var setting = {
+        view: {
+            dblClickExpand: true
+        },
+        check: {
+            enable: true
+        },
+        callback: {
+            onRightClick: OnRightClick
+        },
+        async: {
+            enable: true,
+            dataType: "json",
+            url: "/admin/sys_permission/tree",
+        }
+    };
+
+    function OnRightClick(event, treeId, treeNode) {
+        if (!treeNode && event.target.tagName.toLowerCase() != "button" && $(event.target).parents("a").length == 0) {
+            // zTree.cancelSelectedNode();
+            // showRMenu("root", event.clientX, event.clientY);
+        } else if (treeNode && !treeNode.noR) {
+            zTree.selectNode(treeNode);
+            showRMenu("node", event.clientX, event.clientY);
+        }
+    }
+
+    function showRMenu(type, x, y) {
+        $("#rMenu ul").show();
+        $("#m_del").show();
+        $("#m_check").show();
+        $("#m_unCheck").show();
+
+        y += document.body.scrollTop;
+        x += document.body.scrollLeft;
+        rMenu.css({"top": y + "px", "left": x + "px", "visibility": "visible"});
+
+        $("body").bind("mousedown", onBodyMouseDown);
+    }
+
+    function hideRMenu() {
+        if (rMenu) rMenu.css({"visibility": "hidden"});
+        $("body").unbind("mousedown", onBodyMouseDown);
+    }
+
+    function onBodyMouseDown(event) {
+        if (!(event.target.id == "rMenu" || $(event.target).parents("#rMenu").length > 0)) {
+            rMenu.css({"visibility": "hidden"});
+        }
+    }
+
+    function add() {
+        hideRMenu();
+        let selectedNode = zTree.getSelectedNodes()[0];
+        if (selectedNode) {
+            $('#form')[0].reset();
+            $('#parent_code').val(selectedNode.code);
+            $('#modal').modal();
+        }
+    }
+
+    function update() {
+        hideRMenu();
+        let selectedNode = zTree.getSelectedNodes()[0];
+        if (selectedNode) {
+            $('#form')[0].reset();
+            $('#id').val(selectedNode.id);
+            $('#code').val(selectedNode.code);
+            $('#parent_code').val(selectedNode.parent_code);
+            $('#priority').val(selectedNode.priority);
+            $('#name').val(selectedNode.oName);
+            $('#icon').val(selectedNode.oIcon);
+            $('#url').val(selectedNode.oUrl);
+            $('#is_menu').val(selectedNode.is_menu);
+            $('#modal').modal();
+        }
+    }
+
+    function remove() {
+        hideRMenu();
+        var nodes = zTree.getSelectedNodes();
+        if (nodes && nodes.length > 0) {
+            if (nodes[0].children && nodes[0].children.length > 0) {
+                var msg = "要删除的节点是父节点，如果删除将连同子节点一起删掉。\n\n请确认！";
+                if (confirm(msg) == true) {
+                    removePermission(nodes[0].id);
+                }
+            } else {
+                layer.confirm('是否确定删除?', {icon: 3, title: '提示'}, function (index) {
+                    removePermission(nodes[0].id);
+                });
+            }
+        }
+    }
+
+    function removePermission(id) {
+        PH.api2('/admin/sys_permission/remove', {"id": id},
+            function (ret) {
+                layer.alert("保存成功", function () {
+                    location.reload();
+                });
+            });
+    }
+
+    function view(checked) {
+        var nodes = zTree.getSelectedNodes();
+        if (nodes && nodes.length > 0) {
+            zTree.checkNode(nodes[0], checked, true);
+        }
+        hideRMenu();
+    }
+
+    function resetTree() {
+        hideRMenu();
+        $.fn.zTree.init($("#tree"), setting, zNodes);
+    }
+
+    let zTree, rMenu;
+    $(document).ready(function () {
+        $.fn.zTree.init($("#tree"), setting, null);
+        zTree = $.fn.zTree.getZTreeObj("tree");
+        rMenu = $("#rMenu");
+
+        $('#saveBtn').click(function () {
+            PH.api2('/admin/sys_permission/save', $('#form').serialize(),
+                function (ret) {
+                    layer.alert("保存成功", function () {
+                        location.reload();
+                    });
+                });
+        });
+    });
+    //-->
+</SCRIPT>

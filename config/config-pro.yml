@@ -1,0 +1,21 @@
+server:
+  port: 8082
+
+logpath: /data/logs/gf-admin
+
+debug: false
+
+code:
+  database: gf_admin
+  modulename: github.com/gogf/gf-admin
+
+database:
+  default:
+    - type: mysql
+      linkinfo: root:root@tcp(127.0.0.1:3306)/gf_admin
+
+domain: http://xxx.xxx.xxx
+
+oss:
+  url:
+    prefix: http://xxx.xxx.xxx

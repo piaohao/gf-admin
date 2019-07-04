@@ -1,0 +1,4 @@
+INSERT INTO sys_permission ( code, parent_code, name, icon, url, priority, level, is_menu, status) VALUES ( '/admin/biz_payee', 'card', '代理人', '', '/admin/biz_payee/index', 6, null, 1, 'Y');
+INSERT INTO sys_permission ( code, parent_code, name, icon, url, priority, level, is_menu, status) VALUES ( '/admin/biz_payee/add', '/admin/biz_payee', '添加', '', '/admin/biz_payee/add', 0, null, 0, 'Y');
+INSERT INTO sys_permission ( code, parent_code, name, icon, url, priority, level, is_menu, status) VALUES ( '/admin/biz_payee/edit', '/admin/biz_payee', '编辑', '', '/admin/biz_payee/edit', 0, null, 0, 'Y');
+INSERT INTO sys_permission ( code, parent_code, name, icon, url, priority, level, is_menu, status) VALUES ( '/admin/biz_payee/remove', '/admin/biz_payee', '删除', '', '/admin/biz_payee/remove', 0, null, 0, 'Y');

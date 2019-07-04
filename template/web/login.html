@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" style="font-size: 22.08px;">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+    <link rel="shortcut icon" href="{{.OssUrlPrefix}}/static/favicon.ico">
+    <title>GF-ADMIN</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        #app {
+            font-family: Avenir, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            color: #2c3e50;
+        }
+
+        .page--register[data-v-f6558770] {
+            padding: 1.6rem 1.066667rem;
+        }
+
+        .page--register .tips {
+            font-size: .8rem;
+            color: #151f30;
+        }
+
+        .page--register .input__wrapper[data-v-f6558770] {
+            margin-top: 1.6rem;
+            padding: .16rem;
+            border-bottom: .053333rem solid #eeedee;
+        }
+
+        .page--register .input[data-v-f6558770] {
+            width: 100%;
+            border: 0 solid #fff;
+            font-size: 1.28rem;
+            font-weight: 900;
+        }
+
+        .page--register .button[data-v-f6558770]:disabled {
+            background: #bcc0c9;
+        }
+
+        .page--register .button[data-v-f6558770] {
+            width: 100%;
+            height: 2.453333rem;
+            margin-top: 3.2rem;
+            border: 0 solid #fff;
+            border-radius: .32rem;
+            font-size: .906667rem;
+            color: #fff;
+            background: #FF7761;
+            -webkit-box-shadow: 0 0.106667rem 0.213333rem 0 rgba(17, 154, 255, .13);
+            box-shadow: 0 0.106667rem 0.213333rem 0 rgba(17, 154, 255, .13);
+        }
+    </style>
+</head>
+
+<body>
+<div id="app">
+    <div data-v-f6558770="" class="page page--register">
+        <p data-v-f6558770="" class="tips">登录</p>
+        <div data-v-f6558770="" class="input__wrapper">
+            <input data-v-f6558770="" placeholder="用户名" class="input" id="username">
+        </div>
+        <div data-v-f6558770="" class="input__wrapper">
+            <input data-v-f6558770="" type="password" placeholder="密码" class="input" id="password">
+        </div>
+        <button data-v-f6558770="" class="button" id="loginBtn">登录</button>
+    </div>
+</div>
+<script src="{{.OssUrlPrefix}}/static/sbadmin/vendor/jquery/jquery.js"></script>
+<script>
+    $(function () {
+        let nameStorage = window.localStorage.getItem('gf-admin.name');
+        let passwordStorage = window.localStorage.getItem('gf-admin.password');
+        if (nameStorage) {
+            $('#username').val(nameStorage);
+            $('#password').val(passwordStorage);
+        }
+        $('#loginBtn').click(function () {
+            var username = $('#username').val();
+            var password = $('#password').val();
+            if (!username || !password) {
+                alert('请输入用户名或密码');
+                return;
+            }
+            $.ajax({
+                type: 'post',
+                url: '/web/my/auth',
+                data: {
+                    username: username,
+                    password: password
+                },
+                success: function (ret) {
+                    if (ret.code && ret.code > 0) {
+                        alert(ret.message);
+                        return;
+                    }
+                    window.localStorage.setItem('gf-admin', username);
+                    window.localStorage.setItem('gf-admin', password);
+                    window.localStorage.setItem('token', 'Bearer ' + ret.data.token);
+                    location.href = '/web/my/index';
+                },
+                error: function (ret) {
+                    if (ret.responseJSON) {
+                        alert(ret.responseJSON.message);
+                        return;
+                    }
+                }
+            });
+        });
+    });
+</script>
+</body>
+
+</html>

@@ -1,0 +1,135 @@
+body {
+    background: #f7f7f7;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+#app {
+    font-family: Avenir, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color: #2c3e50;
+}
+
+.page--cards {
+    height: 100vh;
+    background: #f7f7f7;
+}
+
+.page--cards .card-list {
+    padding: .8rem 1.066667rem;
+}
+
+.card-list {
+    padding: .8rem 1.066667rem;
+}
+
+.card-item {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    margin-bottom: .533333rem;
+    padding: 1.12rem .746667rem 1.12rem .853333rem;
+    background: #fff;
+    -webkit-box-shadow: 0 0.106667rem 0.48rem 0 rgba(0, 0, 0, .05);
+    box-shadow: 0 0.106667rem 0.48rem 0 rgba(0, 0, 0, .05);
+    border-radius: .32rem;
+}
+
+.card-item .tag {
+    display: block;
+    margin-left: .32rem;
+    padding: .106667rem;
+    font-size: .48rem;
+    color: #fa6415;
+    background: rgba(250, 100, 21, .15);
+    border-radius: .133333rem;
+}
+
+.card-item .left {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+}
+
+.card-item .img {
+    width: 2.4rem;
+    margin-right: .533333rem;
+}
+
+.card-item .content {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.card-item .tag-list, .card-item .title__wrapper {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+}
+
+.card-item .title__wrapper {
+    width: 100%;
+}
+
+.card-item .title {
+    font-size: .906667rem;
+}
+
+.card-item .description {
+    font-size: .64rem;
+    color: #9ea4b0;
+}
+
+.card-item .arrow {
+    width: .746667rem;
+}
+
+.card-item--disabled .img {
+    -webkit-filter: grayscale(100%);
+    filter: grayscale(100%);
+}
+
+.card-item--disabled .title {
+    color: #9ea4b0;
+}
+
+.page--cards .footer {
+    margin-bottom: 1.28rem;
+    text-align: center;
+    color: #d1d3d8;
+    font-size: .693333rem;
+}
+
+.page--cards .footer .divider {
+    margin: 0 .266667rem;
+}
+
+.page--cards .footer .copyright {
+    color: #d1d3d8;
+    text-decoration: none;
+}

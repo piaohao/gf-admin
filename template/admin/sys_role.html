@@ -1,0 +1,254 @@
+<link rel="stylesheet" href="/static/zTree/css/metroStyle/metroStyle.css" type="text/css">
+<script type="text/javascript" src="/static/zTree/js/jquery.ztree.core.js"></script>
+<script type="text/javascript" src="/static/zTree/js/jquery.ztree.excheck.js"></script>
+<div id="content-wrapper">
+
+    <div class="container-fluid">
+
+
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="/admin/main">首页</a>
+            </li>
+            <li class="breadcrumb-item active">角色表</li>
+        </ol>
+
+
+        <div class="card mb-3">
+            <div class="card-header">角色表</div>
+            <div class="card-body">
+                <div>
+                    <button class="btn btn-primary" id="addBtn">添加</button>
+                </div>
+                <table id="table" class="table table-bordered"></table>
+            </div>
+        </div>
+
+
+    </div>
+
+
+    <footer class="sticky-footer">
+        <div class="container my-auto">
+            <div class="copyright text-center my-auto">
+                <span>Copyright © GF-ADMIN 2019</span>
+            </div>
+        </div>
+    </footer>
+
+</div>
+<!-- Logout Modal-->
+<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">信息</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="form" class="form-horizontal">
+                    <input type="hidden" class="form-control" id="id" name="id">
+                    <div class="form-group row">
+                        <label for="name" class="col-sm-3 col-form-label">名称</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="name" name="name" placeholder="名称">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="description" class="col-sm-3  col-form-label">描述</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="description" name="description"
+                                   placeholder="描述">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-3  col-form-label">权限</label>
+                        <div class="col-sm-9">
+                            <ul id="tree" class="ztree"></ul>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">取消</button>
+                <a class="btn btn-primary" href="#" id="saveBtn">保存</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 渠道弹窗 -->
+<div class="modal fade" id="channelModal" tabindex="-1" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">信息</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="channelForm" class="form-horizontal">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">取消</button>
+                <a class="btn btn-primary" href="#" id="saveChannelBtn">保存</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script id="tpl-opDiv" type="text/html">
+    {{if hasPermission "/admin/sys_role/edit" .Session.permissions}}
+        <button class="btn btn-primary btn-sm" onclick="edit(<%= row.id%>);">编辑</button>
+    {{end}}
+    {{if hasPermission "/admin/sys_role/remove" .Session.permissions}}
+        <button class="btn btn-primary btn-sm ml-1" onclick="remove(<%= row.id%>);">删除</button>
+    {{end}}
+    {{if hasPermission "/admin/biz_role_channel/remove" .Session.permissions}}
+        <button class="btn btn-primary btn-sm ml-1" onclick="editChannel(<%= row.id%>);">编辑渠道</button>
+    {{end}}
+</script>
+<script id="tpl-channelDiv" type="text/html">
+    <input type="hidden" class="form-control" id="roleId" name="roleId" value="<%= roleId%>">
+    <% for(var i = 0; i < allChannels.length; i++){ %>
+    <div class="form-check form-check-inline">
+        <input class="form-check-input" type="checkbox" id="channel<%= i%>" name="channel"
+               value="<%= allChannels[i].id%>"
+        <%if(allChannels[i].checked){%> checked <%}%> >
+        <label class="form-check-label" for="channel<%= i%>">
+            <%= allChannels[i].bank%>(<%= allChannels[i].title%>)</label>
+    </div>
+    <% } %>
+</script>
+<script>
+    function edit(roleId) {
+        $('#form')[0].reset();
+        PH.api2('/admin/sys_role/get',
+            {
+                "id": roleId,
+            }, function (ret) {
+                $('#id').val(roleId);
+                $('#name').val(ret.data.name);
+                $('#description').val(ret.data.description);
+                $.fn.zTree.init($("#tree"), {
+                    view: {
+                        dblClickExpand: true
+                    },
+                    check: {
+                        enable: true,
+                        chkboxType: {"Y": "p", "N": "s"},
+                    },
+                    callback: {},
+                    async: {
+                        enable: true,
+                        dataType: "json",
+                        url: "/admin/sys_permission/roleTree",
+                        otherParam: ["roleId", roleId]
+                    }
+                }, null);
+                $('#modal').modal();
+            });
+    }
+
+    function editChannel(roleId) {
+        PH.api2('/admin/biz_role_channel/getByRoleId',
+            {
+                "role_id": roleId,
+            }, function (ret) {
+                let html = template.render($('#tpl-channelDiv').text(), {allChannels: ret.data.allChannels, roleId: roleId});
+                $('#channelForm').html(html);
+                $('#channelModal').modal();
+            });
+    }
+
+    function remove(roleId) {
+        layer.confirm('是否确定删除?', {icon: 3, title: '提示'}, function (index) {
+            PH.api2('/admin/sys_role/remove',
+                {
+                    "id": roleId,
+                }, function (ret) {
+                    let index=layer.alert("删除成功", function () {
+                        layer.close(index);
+                        table.ajax.reload(null, false);
+                    });
+                });
+        });
+    }
+
+    $(function () {
+        PH.table("#table", "/admin/sys_role/list",
+            [
+                {"data": "id", "title": "id"},
+                {"data": "name", "title": "角色名"},
+                {"data": "description", "title": "描述"},
+                // {"data": "create_time", "title": "创建日期"},
+                // {"data": "update_time", "title": "更新日期"},
+                {
+                    "title": "操作",
+                    "render": function (data, type, row, meta) {
+                        return template.render($('#tpl-opDiv').text(), {row: row});
+                    }
+                }
+            ]);
+        $('#addBtn').click(function () {
+            $('#form')[0].reset();
+            $.fn.zTree.init($("#tree"), {
+                view: {
+                    dblClickExpand: true
+                },
+                check: {
+                    enable: true,
+                    chkboxType: {"Y": "p", "N": "s"},
+                },
+                callback: {},
+                async: {
+                    enable: true,
+                    dataType: "json",
+                    url: "/admin/sys_permission/tree",
+                }
+            }, null);
+            $('#modal').modal();
+        });
+        $('#saveBtn').click(function () {
+            let tree = $.fn.zTree.getZTreeObj("tree");
+            let checkedNodes = tree.getCheckedNodes(true);
+            let permissionIds = [];
+            checkedNodes.forEach(n => {
+                permissionIds.push(n.id)
+            });
+            PH.api2('/admin/sys_role/save',
+                {
+                    "permissionIds": permissionIds.join(","),
+                    "id": $('#id').val(),
+                    "name": $('#name').val(),
+                    "description": $('#description').val(),
+                }, function (ret) {
+                    $('#modal').modal('hide');
+                    let index = layer.alert("保存成功", function () {
+                        layer.close(index);
+                        table.ajax.reload(null, false);
+                    });
+                });
+        });
+        $('#saveChannelBtn').click(function () {
+            let channelIds = [];
+            $('input[name="channel"]:checked').each(function (index, item) {
+                channelIds.push($(this).val());
+            });
+            PH.api2('/admin/biz_role_channel/batchSave',
+                {
+                    "channelIds": channelIds.join(","),
+                    "roleId": $('#roleId').val(),
+                },
+                function (data) {
+                    $('#channelModal').modal('hide');
+                    let index = layer.alert("保存成功", function () {
+                        layer.close(index);
+                        table.ajax.reload(null, false);
+                    });
+                });
+        });
+    });
+</script>
